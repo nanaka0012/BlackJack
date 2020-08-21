@@ -57,7 +57,8 @@ namespace BlackJack
             AddChildNode(PCardPointSum);
             bool finish = false;
 
-            Dealer.DrawCard(this);
+            Dealer.FirstDraw(this);
+
 
             for (int i = 0; i < 20; i++)
             {

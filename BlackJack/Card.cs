@@ -5,6 +5,7 @@ using System.Text;
 
 namespace BlackJack
 {
+
     public enum Mark
     {
         Diamond,
@@ -17,6 +18,17 @@ namespace BlackJack
     {
         private int no;
         private Mark mark;
+        private bool isReverse;
+
+        public bool IsReverse
+        {
+            get => isReverse;
+            set
+            {
+                isReverse = value;
+                UpdateTexture();
+            }
+        }
 
         public Mark Mark
         {
@@ -81,27 +93,34 @@ namespace BlackJack
 
         private void UpdateTexture()
         {
-            string prefix;
-            switch (Mark)
+            if (!IsReverse)
             {
-                case Mark.Diamond:
-                    prefix = "d";
-                    break;
-                case Mark.Spade:
-                    prefix = "s";
-                    break;
-                case Mark.Heart:
-                    prefix = "h";
-                    break;
-                case Mark.Club:
-                    prefix = "c";
-                    break;
-                default:
-                    prefix = null;
-                    break;
-            }
+                string prefix;
+                switch (Mark)
+                {
+                    case Mark.Diamond:
+                        prefix = "d";
+                        break;
+                    case Mark.Spade:
+                        prefix = "s";
+                        break;
+                    case Mark.Heart:
+                        prefix = "h";
+                        break;
+                    case Mark.Club:
+                        prefix = "c";
+                        break;
+                    default:
+                        prefix = null;
+                        break;
+                }
 
-            Texture = Texture2D.Load($"resources/tramps/{prefix}_{No}.png");
+                Texture = Texture2D.Load($"resources/tramps/{prefix}_{No}.png");
+            }
+            else
+            {
+                Texture = Texture2D.Load($"resources/tramps/backcard.png");
+            }
         }
     }
 }
