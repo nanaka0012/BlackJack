@@ -11,10 +11,12 @@ namespace BlackJack
         /// 手札
         /// </summary>
         public List<Card> Hand { get; }
+
         /// <summary>
         /// 持ち点
         /// </summary>
         public int score;
+
         /// <summary>
         /// バーストしたかどうか
         /// </summary>
@@ -25,8 +27,6 @@ namespace BlackJack
         public PlayerBase(Deck deck)
         {
             this.Hand = new List<Card>();
-            //this.score = score;
-            //this.isBurst = isBurst;
             Deck = deck;
         }
 

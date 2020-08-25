@@ -12,14 +12,17 @@ namespace BlackJack
         {
         }
 
-        public void FirstDraw(MainNode node)
+        public Card FirstDraw(MainNode node)
         {
             var card = Deck.Draw();
             Console.WriteLine($"Dealer: {card.Mark}, {card.No}");
             Hand.Add(card);
-            card.Position = new Vector2F(200 * Hand.Count, 200);
+            card.Position = new Vector2F(100 + 100 * Hand.Count, 150);
+            card.ZOrder = Hand.Count;
+
             card.IsReverse = true;
             node.AddChildNode(card);
+            return card;
         }
 
         public void DrawCard(MainNode node)
@@ -27,7 +30,8 @@ namespace BlackJack
             var card = Deck.Draw();
             Console.WriteLine($"Dealer: {card.Mark}, {card.No}");
             Hand.Add(card);
-            card.Position = new Vector2F(200 * Hand.Count, 200);
+            card.Position = new Vector2F(100 + 100 * Hand.Count, 150);
+            card.ZOrder = Hand.Count;
             node.AddChildNode(card);
         }
     }

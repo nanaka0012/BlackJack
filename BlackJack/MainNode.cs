@@ -8,12 +8,12 @@ namespace BlackJack
 {
     public class MainNode : Node
     {
-        public int round;
+        public int Round = 1;
 
         public TextNode WinnerText { get; set; }
         public TextNode PCardPointSum { get; set; }
         public TextNode DCardPointSum { get; set; }
-        public TextNode TurnText { get; set; }
+        public TextNode RoundText { get; set; }
         public Deck Deck { get; set; }
 
         public Player Player { get; set; }
@@ -27,18 +27,70 @@ namespace BlackJack
             Deck = new Deck();
             Player = new Player(Deck);
             Dealer = new Dealer(Deck);
+
             WinnerText = new TextNode();
-            WinnerText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 30);
+            WinnerText.Color = new Color(255, 155, 39);
+            WinnerText.CenterPosition = WinnerText.ContentSize / 2;
+            WinnerText.Position = Engine.WindowSize / 2;
+            WinnerText.ZOrder = 20;
+            WinnerText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 100);
+
             PCardPointSum = new TextNode();
             PCardPointSum.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
-            PCardPointSum.Position = new Vector2F(0, 500);
+            PCardPointSum.CenterPosition = PCardPointSum.ContentSize / 2;
+            PCardPointSum.Position = new Vector2F(520, 675);
+            PCardPointSum.ZOrder = 5;
+            AddChildNode(PCardPointSum);
+
             DCardPointSum = new TextNode();
             DCardPointSum.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
-            DCardPointSum.Position = new Vector2F(0, 200);
-            TurnText = new TextNode();
-            TurnText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 30);
+            DCardPointSum.CenterPosition = DCardPointSum.ContentSize / 2;
+            DCardPointSum.Position = new Vector2F(520, 83);
+            DCardPointSum.ZOrder = 5;
+
+            RoundText = new TextNode();
+            RoundText.Text = Round.ToString();
+            RoundText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 70);
+            RoundText.CenterPosition = RoundText.ContentSize / 2;
+            RoundText.Position = new Vector2F(862, 645);
+            RoundText.ZOrder = 2;
+            AddChildNode(RoundText);
 
             coroutine = Update();
+        }
+
+        protected override void OnAdded()
+        {
+            // 背景
+            var backGround = new SpriteNode();
+            backGround.Texture = Texture2D.Load("resources/BackGround2.png");
+            backGround.ZOrder = -10;
+            AddChildNode(backGround);
+
+            // ラウンド表示の背景
+            var roundBackground = new SpriteNode();
+            roundBackground.Texture = Texture2D.Load("resources/RoundBackground.png");
+            roundBackground.Position = new Vector2F(825, 590);
+            roundBackground.ZOrder = 1;
+            AddChildNode(roundBackground);
+
+            // プレイヤーの持ち点表示の背景
+            var playerPointBackground = new SpriteNode();
+            playerPointBackground.Texture = Texture2D.Load("resources/PlayerPointBackground.png");
+            playerPointBackground.CenterPosition = playerPointBackground.ContentSize / 2;
+            playerPointBackground.Position = new Vector2F(460, 660);
+            playerPointBackground.ZOrder = 1;
+            AddChildNode(playerPointBackground);
+
+            // ディーラーの持ち点表示の背景
+            var dealerPointBackground = new SpriteNode();
+            dealerPointBackground.Texture = Texture2D.Load("resources/DealerPointBackground.png");
+            dealerPointBackground.CenterPosition = dealerPointBackground.ContentSize / 2;
+            dealerPointBackground.Position = new Vector2F(460, 70);
+            dealerPointBackground.ZOrder = 1;
+            AddChildNode(dealerPointBackground);
+
+            base.OnAdded();
         }
 
         protected override void OnUpdate()
@@ -54,10 +106,9 @@ namespace BlackJack
 
         IEnumerator<int> Update()
         {
-            AddChildNode(PCardPointSum);
             bool finish = false;
 
-            Dealer.FirstDraw(this);
+            var firstCard = Dealer.FirstDraw(this);
 
 
             for (int i = 0; i < 20; i++)
@@ -107,12 +158,17 @@ namespace BlackJack
 
                 yield return 0;
             }
+            firstCard.IsReverse = false;
 
             while (!Player.IsBurst && Dealer.Point < 17)
             {
                 // ヒット
                 if (Dealer.Point < 17)
                 {
+                    for (int i = 0; i < 20; i++)
+                    {
+                        yield return 0;
+                    }
                     Dealer.DrawCard(this);
                     if (Dealer.Point > 21)
                     {
@@ -156,6 +212,7 @@ namespace BlackJack
                 WinnerText.Text = "Dealerの勝ち";
             }
 
+            WinnerText.CenterPosition = WinnerText.ContentSize / 2;
             AddChildNode(WinnerText);
             AddChildNode(DCardPointSum);
 
@@ -164,6 +221,12 @@ namespace BlackJack
                 //次のラウンドのために初期化
                 if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push)
                 {
+                    if (Round == 10)
+                    {
+                        Engine.RemoveNode(this);
+                        Engine.AddNode(new MainNode());
+                    }
+
                     WinnerText.Text = "";
                     Player.Hand.Clear();
                     Dealer.Hand.Clear();
@@ -173,6 +236,11 @@ namespace BlackJack
                     }
                     finish = false;
                     RemoveChildNode(DCardPointSum);
+
+                    Round++;
+                    RoundText.Text = Round.ToString();
+                    RoundText.CenterPosition = RoundText.ContentSize / 2;
+
                     break;
                 }
                 yield return 0;

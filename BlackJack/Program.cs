@@ -11,7 +11,6 @@ namespace BlackJack
         { 
             // エンジンを初期化
             Engine.Initialize("Tutorial", 960, 720);
-            Console.WriteLine("Zキーでカードを引く");
 
             Engine.AddNode(new MainNode());
 

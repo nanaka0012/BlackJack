@@ -16,7 +16,8 @@ namespace BlackJack
             var card = Deck.Draw();
             Console.WriteLine($"Player: {card.Mark}, {card.No}");
             Hand.Add(card);
-            card.Position = new Vector2F(200 * Hand.Count, 500);
+            card.Position = new Vector2F(100 + 100 * Hand.Count, 370);
+            card.ZOrder = Hand.Count;
             node.AddChildNode(card);
         }
     }
