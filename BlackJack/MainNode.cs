@@ -218,6 +218,7 @@ namespace BlackJack
 
             while (true)
             {
+                yield return 0;
                 //次のラウンドのために初期化
                 if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push)
                 {
@@ -243,7 +244,6 @@ namespace BlackJack
 
                     break;
                 }
-                yield return 0;
             }
         }
     }
