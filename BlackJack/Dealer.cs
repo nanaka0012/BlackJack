@@ -16,8 +16,8 @@ namespace BlackJack
         public Card FirstDraw(MainNode node)
         {
             // 効果音の場合は第2引数を true に設定して事前にファイルを解凍することが推奨されている。
-            var se = Sound.Load(@"resources/card-turn-over.ogg", true);
-            var id = Engine.Sound.Play(se);
+            var se = Sound.Load(@"resources/card-put.ogg", true);
+            Engine.Sound.Play(se);
 
             var card = Deck.Draw();
             Console.WriteLine($"Dealer: {card.Mark}, {card.No}");
@@ -32,8 +32,8 @@ namespace BlackJack
 
         public void DrawCard(MainNode node)
         {
-            var se = Sound.Load(@"resources/card-turn-over.ogg", true);
-            var id = Engine.Sound.Play(se);
+            var se = Sound.Load(@"resources/card-put.ogg", true);
+            Engine.Sound.Play(se);
 
             var card = Deck.Draw();
             Console.WriteLine($"Dealer: {card.Mark}, {card.No}");

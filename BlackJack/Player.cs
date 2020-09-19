@@ -13,6 +13,9 @@ namespace BlackJack
 
         public void DrawCard(MainNode node)
         {
+            var se = Sound.Load(@"resources/card-put.ogg", true);
+            Engine.Sound.Play(se);
+
             var card = Deck.Draw();
             Console.WriteLine($"Player: {card.Mark}, {card.No}");
             Hand.Add(card);

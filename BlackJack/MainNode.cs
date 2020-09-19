@@ -1,5 +1,6 @@
 ﻿using Altseed2;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,13 @@ namespace BlackJack
     {
         public int Round = 1;
 
-        public TextNode WinnerText { get; set; }
+        public TextNode Score { get; set; }
+
+        public SpriteNode Title { get; set; }
+        public SpriteNode Win { get; set; }
+        public SpriteNode Lose { get; set; }
+        public SpriteNode Draw { get; set; }
+
         public TextNode PCardPointSum { get; set; }
         public TextNode DCardPointSum { get; set; }
         public TextNode RoundText { get; set; }
@@ -20,7 +27,7 @@ namespace BlackJack
 
         public Dealer Dealer { get; set; }
 
-        IEnumerator<int> coroutine;
+        IEnumerator coroutine;
 
         public MainNode()
         {
@@ -28,12 +35,40 @@ namespace BlackJack
             Player = new Player(Deck);
             Dealer = new Dealer(Deck);
 
-            WinnerText = new TextNode();
-            WinnerText.Color = new Color(255, 155, 39);
-            WinnerText.CenterPosition = WinnerText.ContentSize / 2;
-            WinnerText.Position = Engine.WindowSize / 2;
-            WinnerText.ZOrder = 20;
-            WinnerText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 100);
+            //タイトル
+            Title = new SpriteNode();
+            Title.Texture = Texture2D.Load("resources/title.png");
+            Title.Position = Engine.WindowSize / 2;
+            Title.CenterPosition = Title.ContentSize / 2;
+            Title.ZOrder = 5;
+            AddChildNode(Title);
+
+            //勝ち表示
+            Win = new SpriteNode();
+            Win.Texture = Texture2D.Load("resources/win.png");
+            Win.Position = Engine.WindowSize / 2;
+            Win.CenterPosition = Win.ContentSize / 2;
+            Win.ZOrder = 10;
+            Win.IsDrawn = false;
+            AddChildNode(Win);
+
+            //負け表示
+            Lose = new SpriteNode();
+            Lose.Texture = Texture2D.Load("resources/lose.png");
+            Lose.Position = Engine.WindowSize / 2;
+            Lose.CenterPosition = Lose.ContentSize / 2;
+            Lose.ZOrder = 10;
+            Lose.IsDrawn = false;
+            AddChildNode(Lose);
+
+            //引き分け
+            Draw = new SpriteNode();
+            Draw.Texture = Texture2D.Load("resources/draw.png");
+            Draw.Position = Engine.WindowSize / 2;
+            Draw.CenterPosition = Draw.ContentSize / 2;
+            Draw.ZOrder = 10;
+            Draw.IsDrawn = false;
+            AddChildNode(Draw);
 
             PCardPointSum = new TextNode();
             PCardPointSum.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
@@ -50,6 +85,14 @@ namespace BlackJack
             DCardPointSum.Text = "?";
             AddChildNode(DCardPointSum);
 
+            //Score = new TextNode();
+            //Score.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
+            //Score.CenterPosition = new Vector2F(0, Score.ContentSize.Y / 2);
+            //Score.Position = new Vector2F(10, 50);
+            //Score.ZOrder = 5;
+            //Score.Text = "○　×";
+            //AddChildNode(Score);
+
             RoundText = new TextNode();
             RoundText.Text = Round.ToString();
             RoundText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 70);
@@ -58,7 +101,7 @@ namespace BlackJack
             RoundText.ZOrder = 2;
             AddChildNode(RoundText);
 
-            coroutine = Update();
+            coroutine = PlayCoroutine(Update());
         }
 
         protected override void OnAdded()
@@ -69,6 +112,7 @@ namespace BlackJack
             backGround.ZOrder = -10;
             AddChildNode(backGround);
 
+            //キー表示
             var key = new SpriteNode();
             key.Texture = Texture2D.Load("resources/Key.png");
             key.Position = new Vector2F(50, 600);
@@ -105,51 +149,89 @@ namespace BlackJack
         {
             base.OnUpdate();
             PCardPointSum.Text = $"{Player.Point}";
+
             if (!(coroutine?.MoveNext() ?? false))
             {
-                coroutine = Update();
+                coroutine = PlayCoroutine(Update());
             }
         }
 
-        IEnumerator<int> Update()
+        IEnumerator<IEnumerator> Update()
         {
+            while (true)
+            {
+                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push)
+                {
+                    RemoveChildNode(Title);
+                    break;
+                }
+                yield return null;
+            }
+
+            while (true)
+            {
+                yield return RoundRoutine();
+
+                while (true)
+                {
+                    yield return null;
+                    //次のラウンドのために初期化
+                    if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push || (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Push))
+                    {
+                        if (Round == 10)
+                        {
+                            Engine.RemoveNode(this);
+                            Engine.AddNode(new MainNode());
+                        }
+
+                        DCardPointSum.Text = "?";
+                        Win.IsDrawn = false;
+                        Lose.IsDrawn = false;
+                        Draw.IsDrawn = false;
+                        Player.Hand.Clear();
+                        Dealer.Hand.Clear();
+                        foreach (var card in Children.OfType<Card>())
+                        {
+                            RemoveChildNode(card);
+                        }
+
+                        Round++;
+                        RoundText.Text = Round.ToString();
+                        RoundText.CenterPosition = RoundText.ContentSize / 2;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        IEnumerator<IEnumerator> RoundRoutine()
+        {
+            //プレイヤー手番の終了フラグ
             bool finish = false;
 
             //Dealerの最初のカードだけ伏せカードに
             var firstCard = Dealer.FirstDraw(this);
-
-
-            for (int i = 0; i < 20; i++)
-            {
-                yield return 0;
-            }
+            yield return Delay(20);
 
             Dealer.DrawCard(this);
-            for (int i = 0; i < 20; i++)
-            {
-                yield return 0;
-            }
+            yield return Delay(20);
 
             Player.DrawCard(this);
-            for (int i = 0; i < 20; i++)
-            {
-                yield return 0;
-            }
+            yield return Delay(20);
+
             Player.DrawCard(this);
 
             while (!finish && Player.Point < 21)
             {
                 // ヒット
-                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push)
+                if (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Push)
                 {
                     Player.DrawCard(this);
                     if (Player.Point > 21)
                     {
                         Console.WriteLine("Playerがバースト");
-                        for (int i = 0; i < 20; i++)
-                        {
-                            yield return 0;
-                        }
+                        yield return Delay(20);
                         break;
                     }
                     else if (Player.Point == 21)
@@ -158,25 +240,28 @@ namespace BlackJack
                     finish = false;
                 }
                 // スタンド
-                if (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Push)
+                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push)
                 {
                     finish = true;
                     break;
                 }
 
-                yield return 0;
+                yield return null;
             }
+            var se = Sound.Load(@"resources/card-turn-over.ogg", true);
+            Engine.Sound.Play(se);
             firstCard.IsReverse = false;
+
+            yield return Delay(20);
+
 
             while (!Player.IsBurst && Dealer.Point < 17)
             {
                 // ヒット
                 if (Dealer.Point < 17)
                 {
-                    for (int i = 0; i < 20; i++)
-                    {
-                        yield return 0;
-                    }
+                    yield return Delay(20);
+
                     Dealer.DrawCard(this);
                     if (Dealer.Point > 21)
                     {
@@ -190,73 +275,69 @@ namespace BlackJack
                     break;
                 }
 
-                yield return 0;
+                yield return null;
             }
 
             if (!Player.IsBurst)
             {
                 if (Dealer.IsBurst)
                 {
-                    WinnerText.Text = "Playerの勝ち";
+                    Win.IsDrawn = true;
                 }
                 else
                 {
                     if (Player.Point > Dealer.Point)
                     {
-                        WinnerText.Text = "Playerの勝ち";
+                        Win.IsDrawn = true;
                     }
                     else if (Player.Point == Dealer.Point)
                     {
-                        WinnerText.Text = "引き分け";
+                        Draw.IsDrawn = true;
                     }
                     else
                     {
-                        WinnerText.Text = "Dealerの勝ち";
+                        Lose.IsDrawn = true;
                     }
                 }
             }
             else
             {
-                WinnerText.Text = "Dealerの勝ち";
+                Lose.IsDrawn = true;
             }
 
-            WinnerText.CenterPosition = WinnerText.ContentSize / 2;
             DCardPointSum.Text = $"{Dealer.Point}";
-            AddChildNode(WinnerText);
 
-            for (int i = 0; i < 20; i++)
+            yield return Delay(20);
+        }
+
+        IEnumerator<IEnumerator> Delay(int frame)
+        {
+            for (int i = 0; i < frame; i++)
             {
-                yield return 0;
+                yield return null;
             }
+        }
 
+        IEnumerator PlayCoroutine(IEnumerator coroutine)
+        {
+            var currentCoroutine = coroutine;
+            Stack<IEnumerator> stackCroutine = new Stack<IEnumerator>();
             while (true)
             {
-                yield return 0;
-                //次のラウンドのために初期化
-                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push || (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Push))
+                if (currentCoroutine?.MoveNext() ?? false)
                 {
-                    if (Round == 10)
+                    if (currentCoroutine?.Current is IEnumerator sub)
                     {
-                        Engine.RemoveNode(this);
-                        Engine.AddNode(new MainNode());
+                        stackCroutine.Push(currentCoroutine);
+                        currentCoroutine = sub;
                     }
-
-                    DCardPointSum.Text = "?";
-                    WinnerText.Text = "";
-                    Player.Hand.Clear();
-                    Dealer.Hand.Clear();
-                    foreach (var card in Children.OfType<Card>())
-                    {
-                        RemoveChildNode(card);
-                    }
-                    finish = false;
-
-                    Round++;
-                    RoundText.Text = Round.ToString();
-                    RoundText.CenterPosition = RoundText.ContentSize / 2;
-
-                    break;
                 }
+                else
+                {
+                    if (stackCroutine.Count == 0) yield break;
+                    currentCoroutine = stackCroutine.Pop();
+                }
+                yield return null;
             }
         }
     }

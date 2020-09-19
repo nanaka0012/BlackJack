@@ -14,6 +14,12 @@ namespace BlackJack
 
             Engine.AddNode(new MainNode());
 
+            var bgm = Sound.Load("resources/c17.ogg", false);
+            bgm.LoopStartingPoint = 0.0f;
+            bgm.LoopEndPoint = bgm.Length;
+            bgm.IsLoopingMode = true;
+            Engine.Sound.Play(bgm);
+
             // メインループ
             while (Engine.DoEvents())
             {
