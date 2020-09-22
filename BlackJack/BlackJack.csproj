@@ -29,6 +29,9 @@
     <None Update="resources\card-turn-over.ogg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="resources\cong.ogg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="resources\cong.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

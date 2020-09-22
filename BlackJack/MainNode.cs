@@ -457,12 +457,14 @@ namespace BlackJack
             Score.CenterPosition = Score.ContentSize / 2;
 
             Engine.Sound.Fade(BgmId, 3f, 1f);
-            yield return Delay(50);
+            yield return Delay(80);
 
             if (Player.WinCount > Dealer.WinCount)
             {
                 ResultMessage.Texture = Texture2D.Load("resources/cong.png");
                 ResultMessage.CenterPosition = ResultMessage.ContentSize / 2;
+                var se2 = Sound.Load(@"resources/cong.ogg", true);
+                Engine.Sound.Play(se2);
             }
             else if (Player.WinCount == Dealer.WinCount)
             {
