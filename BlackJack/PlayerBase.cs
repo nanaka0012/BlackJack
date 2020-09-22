@@ -18,6 +18,11 @@ namespace BlackJack
         public int score;
 
         /// <summary>
+        /// 勝った回数
+        /// </summary>
+        public int WinCount;
+
+        /// <summary>
         /// バーストしたかどうか
         /// </summary>
         public bool IsBurst => Point > 21;

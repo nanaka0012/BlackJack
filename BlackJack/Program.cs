@@ -18,7 +18,7 @@ namespace BlackJack
             bgm.LoopStartingPoint = 0.0f;
             bgm.LoopEndPoint = bgm.Length;
             bgm.IsLoopingMode = true;
-            Engine.Sound.Play(bgm);
+            MainNode.BgmId = Engine.Sound.Play(bgm);
 
             // メインループ
             while (Engine.DoEvents())

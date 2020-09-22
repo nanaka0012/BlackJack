@@ -11,6 +11,10 @@ namespace BlackJack
     {
         public int Round = 1;
 
+        public static int BgmId;
+
+        public Random Random;
+
         public TextNode Score { get; set; }
 
         public SpriteNode Title { get; set; }
@@ -19,6 +23,11 @@ namespace BlackJack
         public SpriteNode Draw { get; set; }
         public SpriteNode Bust { get; set; }
         public SpriteNode Blackjack { get; set; }
+        public SpriteNode Mask { get; set; }
+        public SpriteNode ResultTitle { get; set; }
+        public SpriteNode ResultHolder { get; set; }
+        public SpriteNode ResultBar { get; set; }
+        public SpriteNode ResultMessage { get; set; }
 
         public TextNode PCardPointSum { get; set; }
         public TextNode DCardPointSum { get; set; }
@@ -105,14 +114,6 @@ namespace BlackJack
             DCardPointSum.Text = "?";
             AddChildNode(DCardPointSum);
 
-            //Score = new TextNode();
-            //Score.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
-            //Score.CenterPosition = new Vector2F(0, Score.ContentSize.Y / 2);
-            //Score.Position = new Vector2F(10, 50);
-            //Score.ZOrder = 5;
-            //Score.Text = "○　×";
-            //AddChildNode(Score);
-
             RoundText = new TextNode();
             RoundText.Text = Round.ToString();
             RoundText.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 70);
@@ -120,6 +121,66 @@ namespace BlackJack
             RoundText.Position = new Vector2F(837, 645);
             RoundText.ZOrder = 2;
             AddChildNode(RoundText);
+
+            //リザルトのマスク
+            Mask = new SpriteNode();
+            Mask.Texture = Texture2D.Load("resources/mask.png");
+            Mask.Position = Engine.WindowSize / 2;
+            Mask.CenterPosition = Mask.ContentSize / 2;
+            Mask.ZOrder = 15;
+            Mask.Color = new Color(0, 0, 0, 0);
+            AddChildNode(Mask);
+
+            //リザルトのマスク
+            Mask = new SpriteNode();
+            Mask.Texture = Texture2D.Load("resources/mask.png");
+            Mask.Position = Engine.WindowSize / 2;
+            Mask.CenterPosition = Mask.ContentSize / 2;
+            Mask.ZOrder = 15;
+            Mask.Color = new Color(0, 0, 0, 0);
+            AddChildNode(Mask);
+
+            //リザルトタイトル
+            ResultTitle = new SpriteNode();
+            ResultTitle.Texture = Texture2D.Load("resources/resultTitle.png");
+            ResultTitle.Position = new Vector2F(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 5);
+            ResultTitle.CenterPosition = ResultTitle.ContentSize / 2;
+            ResultTitle.ZOrder = 16;
+            ResultTitle.IsDrawn = false;
+            AddChildNode(ResultTitle);
+
+            //リザルトのPlater, Dealer表示
+            ResultHolder = new SpriteNode();
+            ResultHolder.Texture = Texture2D.Load("resources/score.png");
+            ResultHolder.Position = new Vector2F(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2 - 70);
+            ResultHolder.CenterPosition = ResultHolder.ContentSize / 2;
+            ResultHolder.ZOrder = 16;
+            ResultHolder.IsDrawn = false;
+            AddChildNode(ResultHolder);
+
+            //スコアの間の棒
+            ResultBar = new SpriteNode();
+            ResultBar.Texture = Texture2D.Load("resources/resultBar.png");
+            ResultBar.Position = Engine.WindowSize / 2;
+            ResultBar.CenterPosition = ResultBar.ContentSize / 2;
+            ResultBar.ZOrder = 16;
+            ResultBar.IsDrawn = false;
+            AddChildNode(ResultBar);
+
+            //リザルトメッセージ
+            ResultMessage = new SpriteNode();
+            ResultMessage.Position = new Vector2F(Engine.WindowSize.X / 2, (Engine.WindowSize.Y / 3) * 2 + 20);
+            ResultMessage.ZOrder = 16;
+            AddChildNode(ResultMessage);
+
+            //リザルトのスコア表示
+            Score = new TextNode();
+            Score.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 100);
+            Score.CenterPosition = Score.ContentSize / 2;
+            Score.Position = Engine.WindowSize / 2;
+            Score.ZOrder = 16;
+            Score.Text = "";
+            AddChildNode(Score);
 
             coroutine = PlayCoroutine(Update());
         }
@@ -200,6 +261,7 @@ namespace BlackJack
                     {
                         if (Round == 10)
                         {
+                            yield return Result();
                             Engine.RemoveNode(this);
                             Engine.AddNode(new MainNode());
                         }
@@ -282,7 +344,7 @@ namespace BlackJack
             var se = Sound.Load(@"resources/card-turn-over.ogg", true);
             Engine.Sound.Play(se);
             firstCard.IsReverse = false;
-            
+
             DCardPointSum.Text = $"{Dealer.Point}";
 
             yield return Delay(20);
@@ -328,12 +390,14 @@ namespace BlackJack
             {
                 if (Dealer.IsBurst)
                 {
+                    Player.WinCount++;
                     Win.IsDrawn = true;
                 }
                 else
                 {
                     if (Player.Point > Dealer.Point)
                     {
+                        Player.WinCount++;
                         Win.IsDrawn = true;
                     }
                     else if (Player.Point == Dealer.Point)
@@ -342,19 +406,83 @@ namespace BlackJack
                     }
                     else
                     {
+                        Dealer.WinCount++;
                         Lose.IsDrawn = true;
                     }
                 }
             }
             else
             {
+                Dealer.WinCount++;
                 Lose.IsDrawn = true;
             }
 
             DCardPointSum.Text = $"{Dealer.Point}";
-
             yield return Delay(20);
         }
+
+        IEnumerator<IEnumerator> Result()
+        {
+            Win.IsDrawn = false;
+            Lose.IsDrawn = false;
+            Draw.IsDrawn = false;
+
+            var se = Sound.Load(@"resources/result.ogg", true);
+            Engine.Sound.Play(se);
+
+            Engine.Sound.Fade(BgmId, 1f, 0.15f);
+            var time = 0f;
+            while (time < 1)
+            {
+                var color = Mask.Color;
+                color.A += 3;
+                Mask.Color = color;
+                time += Engine.DeltaSecond;
+                yield return null;
+            }
+
+            ResultTitle.IsDrawn = true;
+            ResultHolder.IsDrawn = true;
+            ResultBar.IsDrawn = true;
+            var rand = new Random();
+            while (time < 3.6)
+            {
+                Score.Text = $"{rand.Next(0, 10)}         {rand.Next(0, 10)}";
+                Score.CenterPosition = Score.ContentSize / 2;
+                time += Engine.DeltaSecond;
+                yield return null;
+            }
+
+            Score.Text = $"{Player.WinCount}         {Dealer.WinCount}";
+            Score.CenterPosition = Score.ContentSize / 2;
+
+            Engine.Sound.Fade(BgmId, 3f, 1f);
+            yield return Delay(50);
+
+            if (Player.WinCount > Dealer.WinCount)
+            {
+                ResultMessage.Texture = Texture2D.Load("resources/cong.png");
+                ResultMessage.CenterPosition = ResultMessage.ContentSize / 2;
+            }
+            else if (Player.WinCount == Dealer.WinCount)
+            {
+                ResultMessage.Texture = Texture2D.Load("resources/good.png");
+                ResultMessage.CenterPosition = ResultMessage.ContentSize / 2;
+            }
+            else if (Player.WinCount < Dealer.WinCount)
+            {
+                ResultMessage.Texture = Texture2D.Load("resources/try.png");
+                ResultMessage.CenterPosition = ResultMessage.ContentSize / 2;
+            }
+
+            while (true)
+            {
+                if (Engine.Keyboard.GetKeyState(Key.Z) == ButtonState.Push || (Engine.Keyboard.GetKeyState(Key.X) == ButtonState.Push))
+                    break;
+                yield return null;
+            }
+        }
+
 
         IEnumerator<IEnumerator> Delay(int frame)
         {
