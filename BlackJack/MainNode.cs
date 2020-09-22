@@ -17,6 +17,8 @@ namespace BlackJack
         public SpriteNode Win { get; set; }
         public SpriteNode Lose { get; set; }
         public SpriteNode Draw { get; set; }
+        public SpriteNode Bust { get; set; }
+        public SpriteNode Blackjack { get; set; }
 
         public TextNode PCardPointSum { get; set; }
         public TextNode DCardPointSum { get; set; }
@@ -69,6 +71,24 @@ namespace BlackJack
             Draw.ZOrder = 10;
             Draw.IsDrawn = false;
             AddChildNode(Draw);
+
+            //バスト
+            Bust = new SpriteNode();
+            Bust.Texture = Texture2D.Load("resources/bust.png");
+            Bust.Position = Engine.WindowSize / 2;
+            Bust.CenterPosition = Bust.ContentSize / 2;
+            Bust.ZOrder = 10;
+            Bust.IsDrawn = false;
+            AddChildNode(Bust);
+
+            //ブラックジャック
+            Blackjack = new SpriteNode();
+            Blackjack.Texture = Texture2D.Load("resources/jack.png");
+            Blackjack.Position = Engine.WindowSize / 2;
+            Blackjack.CenterPosition = Blackjack.ContentSize / 2;
+            Blackjack.ZOrder = 10;
+            Blackjack.IsDrawn = false;
+            AddChildNode(Blackjack);
 
             PCardPointSum = new TextNode();
             PCardPointSum.Font = Font.LoadDynamicFont("resources/mplus-1m-regular.ttf", 60);
@@ -232,6 +252,9 @@ namespace BlackJack
                     {
                         Console.WriteLine("Playerがバースト");
                         yield return Delay(20);
+                        Bust.IsDrawn = true;
+                        yield return Delay(50);
+                        Bust.IsDrawn = false;
                         break;
                     }
                     else if (Player.Point == 21)
@@ -248,9 +271,19 @@ namespace BlackJack
 
                 yield return null;
             }
+
+            if (Player.Point == 21)
+            {
+                Blackjack.IsDrawn = true;
+                yield return Delay(50);
+                Blackjack.IsDrawn = false;
+            }
+
             var se = Sound.Load(@"resources/card-turn-over.ogg", true);
             Engine.Sound.Play(se);
             firstCard.IsReverse = false;
+            
+            DCardPointSum.Text = $"{Dealer.Point}";
 
             yield return Delay(20);
 
@@ -263,9 +296,15 @@ namespace BlackJack
                     yield return Delay(20);
 
                     Dealer.DrawCard(this);
+                    DCardPointSum.Text = $"{Dealer.Point}";
+
                     if (Dealer.Point > 21)
                     {
                         Console.WriteLine("Dealerがバースト");
+                        yield return Delay(20);
+                        Bust.IsDrawn = true;
+                        yield return Delay(50);
+                        Bust.IsDrawn = false;
                         break;
                     }
                 }
@@ -276,6 +315,13 @@ namespace BlackJack
                 }
 
                 yield return null;
+            }
+
+            if (Dealer.Point == 21)
+            {
+                Blackjack.IsDrawn = true;
+                yield return Delay(50);
+                Blackjack.IsDrawn = false;
             }
 
             if (!Player.IsBurst)

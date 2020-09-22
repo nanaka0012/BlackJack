@@ -10,7 +10,7 @@ namespace BlackJack
         static void Main(string[] args)
         { 
             // エンジンを初期化
-            Engine.Initialize("Tutorial", 960, 720);
+            Engine.Initialize("BlackJack!!", 960, 720);
 
             Engine.AddNode(new MainNode());
 
