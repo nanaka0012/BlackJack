@@ -17,7 +17,6 @@ namespace BlackJack
             Engine.Sound.Play(se);
 
             var card = Deck.Draw();
-            Console.WriteLine($"Player: {card.Mark}, {card.No}");
             Hand.Add(card);
             card.Position = new Vector2F(100 + 100 * Hand.Count, 370);
             card.ZOrder = Hand.Count;

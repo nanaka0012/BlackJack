@@ -149,7 +149,7 @@ namespace BlackJack
             ResultTitle.IsDrawn = false;
             AddChildNode(ResultTitle);
 
-            //リザルトのPlater, Dealer表示
+            //リザルトのPlayer, Dealer表示
             ResultHolder = new SpriteNode();
             ResultHolder.Texture = Texture2D.Load("resources/score.png");
             ResultHolder.Position = new Vector2F(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2 - 70);

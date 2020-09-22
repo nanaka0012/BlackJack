@@ -15,12 +15,10 @@ namespace BlackJack
 
         public Card FirstDraw(MainNode node)
         {
-            // 効果音の場合は第2引数を true に設定して事前にファイルを解凍することが推奨されている。
             var se = Sound.Load(@"resources/card-put.ogg", true);
             Engine.Sound.Play(se);
 
             var card = Deck.Draw();
-            Console.WriteLine($"Dealer: {card.Mark}, {card.No}");
             Hand.Add(card);
             card.Position = new Vector2F(100 + 100 * Hand.Count, 150);
             card.ZOrder = Hand.Count;
@@ -36,7 +34,6 @@ namespace BlackJack
             Engine.Sound.Play(se);
 
             var card = Deck.Draw();
-            Console.WriteLine($"Dealer: {card.Mark}, {card.No}");
             Hand.Add(card);
             card.Position = new Vector2F(100 + 100 * Hand.Count, 150);
             card.ZOrder = Hand.Count;
