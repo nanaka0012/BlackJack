@@ -12,6 +12,8 @@ namespace BlackJack
             // エンジンを初期化
             Engine.Initialize("BlackJack!!", 960, 720);
 
+            Engine.File.AddRootPackageWithPassword("resources.pack", "jack");
+
             Engine.AddNode(new MainNode());
 
             var bgm = Sound.Load("resources/c17.ogg", false);
